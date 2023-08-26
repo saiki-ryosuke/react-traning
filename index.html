@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サイキ課題</title>
+</head>
+<body>
+    <h1 id="title"></h1>
+    <p id="description"></p>
+    <div class="buttons">
+        <button id="グー">グー</button>
+        <button id="チョキ">チョキ</button>
+        <button id="パー">パー</button>
+    </div>
+    <p>こちらの手：<span id="user-hand"></span></p>
+    <p>相手の手：<span id="system-hand"></span></p>
+    <p>結果：<span id="result"></span></p>
+    <div id="history"></div>
+</body>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="module">
+
+// じゃんけん
+const Hands = ["グー", "チョキ" , "パー"];
+const Janken = (UserHand , SystemHand) => {
+    const Fight = UserHand - SystemHand;
+    let Result = "";
+    switch (Fight) {
+        case (-2) :
+            Result = "負け";
+            break;
+        case (-1) :
+            Result = "勝ち";
+            break;
+        case (0) :
+            Result = "あいこ";
+            break;
+        case (1) :
+            Result = "負け";
+            break;
+        case (2) :
+            Result = "勝ち";
+            break;
+    }
+    return Result;
+}
+
+
+//DOM取得
+const TitleArea = document.getElementById("title");
+const DescriptionArea = document.getElementById("description");
+const UserHandArea = document.getElementById("user-hand");
+const SystemHandArea = document.getElementById("system-hand");
+const ResultArea = document.getElementById("result");
+const HistoryArea = document.getElementById("history");
+
+
+// firebase初期化
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js";
+const firebaseConfig = {
+    apiKey: "AIzaSyBUKg2Y3P7CBnwnHMN5TbIs29k93ZQu3Lo",
+    authDomain: "react-test-7ec82.firebaseapp.com",
+    projectId: "react-test-7ec82",
+    storageBucket: "react-test-7ec82.appspot.com",
+    messagingSenderId: "7787532633",
+    appId: "1:7787532633:web:e53e1b47bacb581d5cfc48"
+  };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// じゃんけん履歴10件取得
+const initialJankenResults = await getDocs(
+    query(
+        collection(db,"results"),
+        orderBy("created_at", "desc"),
+        limit(10)
+    )
+);
+
+
+// じゃんけん履歴表示
+initialJankenResults.forEach((doc) => {
+    const CreatedElement = document.createElement("p");
+    CreatedElement.textContent = `${doc.data().created_at} 結果: ${doc.data().result} こちら:${doc.data().user_hand} 相手:${doc.data().system_hand}`;
+    HistoryArea.appendChild(CreatedElement);
+});
+
+
+//じゃんけん結果表示
+const ShowJankenResult = (JankenResult, UserHand, SystemHand) => {
+    UserHandArea.textContent = UserHand;
+    SystemHandArea.textContent = SystemHand;
+    ResultArea.textContent = JankenResult;
+}
+
+
+//最新じゃんけん結果追加と10件目削除
+const UpdateJankenResults = (result, UserHand, SystemHand) => {
+    const CreatedElement = document.createElement("p");
+    const Content = document.createTextNode(`${new Date().toLocaleString("ja-jp")} 結果: ${result} こちら:${UserHand} 相手:${SystemHand}`);
+    CreatedElement.appendChild(Content);
+    HistoryArea.prepend(CreatedElement);
+    HistoryArea.lastElementChild.remove();
+}
+
+
+// じゃんけん結果をfirebaseに登録
+const RegisterJankenResult = async (JankenResult, UserHand, SystemHand) => {
+    const currentDate = new Date();
+    try {
+        const docRef = await addDoc(collection(db, "results"), {
+            user_hand: UserHand,
+            system_hand: SystemHand,
+            result: JankenResult,
+            created_at: currentDate.toLocaleString("ja-jp")
+        })
+    } catch (e) {
+    console.error("Error: ", e);
+    }
+}
+
+
+// ランダム数字を生成
+const RandomNumber = () => {
+    return Math.floor(Math.random() * 3);
+}
+
+
+// グーボタンクリック
+document.getElementById("グー").addEventListener("click", function(){
+    const UserHand = Hands.indexOf("グー");
+    const SystemHand = RandomNumber();
+    const JankenResult = Janken(UserHand , SystemHand);
+    ShowJankenResult(JankenResult, Hands[UserHand], Hands[SystemHand]);
+    UpdateJankenResults(JankenResult, Hands[UserHand], Hands[SystemHand]);
+    RegisterJankenResult(JankenResult, Hands[UserHand], Hands[SystemHand]);
+})
+
+
+// チョキボタンクリック
+document.getElementById("チョキ").addEventListener("click", function(){
+    const UserHand = Hands.indexOf("チョキ");
+    const SystemHand = RandomNumber();
+    const JankenResult = Janken(UserHand , SystemHand);
+    ShowJankenResult(JankenResult, Hands[UserHand], Hands[SystemHand]);
+    UpdateJankenResults(JankenResult, Hands[UserHand], Hands[SystemHand]);
+    RegisterJankenResult(JankenResult, Hands[UserHand], Hands[SystemHand]);
+})
+
+
+// パーボタンクリック
+document.getElementById("パー").addEventListener("click", function(){
+    const UserHand = Hands.indexOf("パー");
+    const SystemHand = RandomNumber();
+    const JankenResult = Janken(UserHand , SystemHand);
+    ShowJankenResult(JankenResult, Hands[UserHand], Hands[SystemHand]);
+    UpdateJankenResults(JankenResult, Hands[UserHand], Hands[SystemHand]);
+    RegisterJankenResult(JankenResult, Hands[UserHand], Hands[SystemHand]);
+})
+
+
+// ヘッドレスCMSでタイトルと説明文を表示
+const Url = "https://saiki.microcms.io/api/v1/react-janken";
+const Token = "EEzQrGasr9DJd2N8PjTjPNPD3xV2uA0AUkVz";
+
+axios.get( Url , {
+    headers:{
+        "X-MICROCMS-API-KEY": Token,
+    },
+}).then((res) => {
+    TitleArea.textContent = res.data.contents[0].title;
+    DescriptionArea.textContent = res.data.contents[0].description;
+    
+}).catch(err => {
+    TitleArea.textContent = "タイトルエラー";
+    DescriptionArea.textContent = "説明文エラー";
+});
+
+</script>
+</html>
