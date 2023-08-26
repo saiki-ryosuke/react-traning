@@ -9,9 +9,9 @@
     <h1 id="title"></h1>
     <p id="description"></p>
     <div class="buttons">
-        <button id="グー">グー</button>
-        <button id="チョキ">チョキ</button>
-        <button id="パー">パー</button>
+        <button id="goo">グー</button>
+        <button id="choki">チョキ</button>
+        <button id="par">パー</button>
     </div>
     <p>こちらの手：<span id="user-hand"></span></p>
     <p>相手の手：<span id="system-hand"></span></p>
@@ -131,7 +131,7 @@ const RandomNumber = () => {
 
 
 // グーボタンクリック
-document.getElementById("グー").addEventListener("click", function(){
+document.getElementById("goo").addEventListener("click", function(){
     const UserHand = Hands.indexOf("グー");
     const SystemHand = RandomNumber();
     const JankenResult = Janken(UserHand , SystemHand);
@@ -142,7 +142,7 @@ document.getElementById("グー").addEventListener("click", function(){
 
 
 // チョキボタンクリック
-document.getElementById("チョキ").addEventListener("click", function(){
+document.getElementById("choki").addEventListener("click", function(){
     const UserHand = Hands.indexOf("チョキ");
     const SystemHand = RandomNumber();
     const JankenResult = Janken(UserHand , SystemHand);
@@ -153,7 +153,7 @@ document.getElementById("チョキ").addEventListener("click", function(){
 
 
 // パーボタンクリック
-document.getElementById("パー").addEventListener("click", function(){
+document.getElementById("par").addEventListener("click", function(){
     const UserHand = Hands.indexOf("パー");
     const SystemHand = RandomNumber();
     const JankenResult = Janken(UserHand , SystemHand);
